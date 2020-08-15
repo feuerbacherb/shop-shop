@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { idbPromise } from '../../utils/helpers';
 import { useQuery } from '@apollo/react-hooks';
 import { useStoreContext } from '../../utils/GlobalState';
 import { UPDATE_PRODUCTS } from '../../utils/actions';
@@ -15,13 +16,29 @@ function ProductList() {
   const { loading, data } = useQuery(QUERY_PRODUCTS);
   
   useEffect(() => {
+    // if there is data to be stored
     if (data) {
+      // store the data in the global state object
       dispatch({
         type: UPDATE_PRODUCTS,
         products: data.products
       });
+
+      // now let's take each product and save it to the indexedDB
+      data.products.forEach((product) => {
+        idbPromise('products', 'put', product);
+      });
+    } else if (!loading) {
+      // since we are offline, get all of the data from the `products` store
+      idbPromise('products', 'get').then((products) => {
+        // use retrieved data to set gloval state for offline browsing
+        dispatch({
+          type: UPDATE_PRODUCTS,
+          products: products
+        });
+      });
     }
-  }, [data, dispatch]);
+  }, [data, loading, dispatch]);
   
   function filterProducts() {
     if (!currentCategory) {
