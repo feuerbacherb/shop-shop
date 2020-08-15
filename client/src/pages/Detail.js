@@ -63,7 +63,7 @@ function Detail() {
       // if we're updating quantity, use existing item data and increment purcaseQuantity
       idbPromise('cart', 'put', {
         ...itemInCart,
-        purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 
+        purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
       })
     } else {
       dispatch({
